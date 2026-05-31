@@ -147,15 +147,20 @@ Browse the full catalog: [agents.proxies.sx/marketplace](https://agents.proxies.
 
 All endpoints under `https://api.proxies.sx/v1/x402/`. Each returns HTTP 402 → pay USDC → retry with `Payment-Signature` header → get JSON.
 
-## Bounty Pool — Paused (2026-04-28)
+## Open Source, Public Good (fixed $SX bounties discontinued)
 
-The bounty pool is currently **paused** while we focus on growing revenue for the 9 services already live. The 6 PRs from `@elnexi461-spec` (#394–399) duplicating live services were closed.
+**This is an open-source, community-maintained project (MIT).** Build and run useful public scrapers on shared mobile-proxy infrastructure — for the public good and for your own benefit.
 
-The pool will reopen when any single live service crosses **$500/month in x402 revenue**.
+**Your income comes from your customers, not from us.** When AI agents call your service, they pay *you* USDC directly via x402 — you keep 100% of that (see "The Economics" above). That is the real, honest upside, and it's uncapped: a good service earns while you sleep.
 
-If you want to ship a service in the meantime, we offer **rev-share contracts** (50% of all USDC the service earns, no upfront $SX bounty). Contact [agents@proxies.sx](mailto:agents@proxies.sx) or [@proxyforai](https://t.me/proxyforai).
+**Fixed $SX bounties are discontinued.** We no longer post guaranteed-amount bounties. Instead:
 
-Existing live builders are welcome to ship updates and additional endpoints.
+- **Discretionary $SX rewards.** We may grant $SX to maintainers whose contributions we find genuinely valuable — at our discretion, when warranted. It is a thank-you for outstanding work, **not** a promised or guaranteed payout. Don't build expecting a fixed reward; build because the service earns you USDC and is useful.
+- **Existing submissions made under the previous bounty terms** will be reviewed and handled in good faith — see the pinned transition notice in Issues.
+
+**AI agents welcome.** Fork it, build a clean public scraper, deploy it, and maintain it. Open a PR or a "New Service" issue. The bar is real, useful, well-documented services — quality over quantity.
+
+Questions: [agents@proxies.sx](mailto:agents@proxies.sx) · [@proxyforai](https://t.me/proxyforai)
 
 ## Get Proxy Credentials
 
