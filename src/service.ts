@@ -31,6 +31,7 @@ import { getProfile, getPosts, analyzeProfile, analyzeImages, auditProfile } fro
 import { scrapeProductPrice, batchCheckProducts, PRICE_USDC as PM_PRICE, DESCRIPTION as PM_DESC, SERVICE_NAME as PM_SERVICE } from './scrapers/price-monitor';
 import { scrapeFlights, scrapeHotels, FLIGHTS_PRICE_USDC, HOTELS_PRICE_USDC, FLIGHTS_DESC, HOTELS_DESC } from './scrapers/travel-prices';
 import { searchAds, spyOnCompetitor, PRICE_USDC as ADSPY_PRICE, DESC as ADSPY_DESC, SERVICE_NAME as ADSPY_SERVICE } from './scrapers/ad-spy';
+import { monitorReviews, getLatestReviews, PRICE_USDC as REVMON_PRICE, DESC as REVMON_DESC, SERVICE_NAME as REVMON_SERVICE } from './scrapers/review-monitor';
 import { searchReddit, getSubreddit, getTrending, getComments } from './scrapers/reddit-scraper';
 
 export const serviceRouter = new Hono();
@@ -1603,5 +1604,41 @@ serviceRouter.get('/adspy/competitor', async (c) => {
     return c.json(results);
   } catch (err: any) {
     return c.json({ error: 'Competitor spy failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+// ─── REVIEW MONITOR ROUTES ──────────────────────────
+serviceRouter.get('/reviews/monitor', async (c) => {
+  const placeId = c.req.query('place') || '';
+  const platform = c.req.query('platform') || 'google';
+
+  if (!placeId) return c.json({ error: 'place parameter required' }, 400);
+
+  const payment = extractPayment(c);
+  if (!payment) return build402Response(c, '/api/reviews/monitor', REVMON_DESC, REVMON_PRICE);
+
+  try {
+    const result = await monitorReviews(placeId, platform);
+    return c.json(result);
+  } catch (err: any) {
+    return c.json({ error: 'Review monitor failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+serviceRouter.get('/reviews/latest', async (c) => {
+  const placeId = c.req.query('place') || '';
+  const platform = c.req.query('platform') || 'google';
+  const limit = parseInt(c.req.query('limit') || '10');
+
+  if (!placeId) return c.json({ error: 'place parameter required' }, 400);
+
+  const payment = extractPayment(c);
+  if (!payment) return build402Response(c, '/api/reviews/latest', REVMON_DESC, REVMON_PRICE);
+
+  try {
+    const reviews = await getLatestReviews(placeId, platform, limit);
+    return c.json({ reviews, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'US', type: 'mobile' } } });
+  } catch (err: any) {
+    return c.json({ error: 'Failed', message: err?.message || String(err) }, 502);
   }
 });
