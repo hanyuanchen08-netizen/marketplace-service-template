@@ -30,6 +30,7 @@ import {
 import { getProfile, getPosts, analyzeProfile, analyzeImages, auditProfile } from './scrapers/instagram-scraper';
 import { scrapeProductPrice, batchCheckProducts, PRICE_USDC as PM_PRICE, DESCRIPTION as PM_DESC, SERVICE_NAME as PM_SERVICE } from './scrapers/price-monitor';
 import { scrapeFlights, scrapeHotels, FLIGHTS_PRICE_USDC, HOTELS_PRICE_USDC, FLIGHTS_DESC, HOTELS_DESC } from './scrapers/travel-prices';
+import { searchAds, spyOnCompetitor, PRICE_USDC as ADSPY_PRICE, DESC as ADSPY_DESC, SERVICE_NAME as ADSPY_SERVICE } from './scrapers/ad-spy';
 import { searchReddit, getSubreddit, getTrending, getComments } from './scrapers/reddit-scraper';
 
 export const serviceRouter = new Hono();
@@ -1567,5 +1568,40 @@ serviceRouter.get('/travel/hotels', async (c) => {
     return c.json({ results, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'any', host: 'proxies.sx', type: 'mobile' } } });
   } catch (err: any) {
     return c.json({ error: 'Hotel search failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+// ─── AD SPY ROUTES ─────────────────────────────────
+serviceRouter.get('/adspy/search', async (c) => {
+  const keyword = c.req.query('keyword') || 'laptops';
+  const country = c.req.query('country') || 'US';
+
+  const payment = extractPayment(c);
+  if (!payment) {
+    return build402Response(c, '/api/adspy/search', ADSPY_DESC, ADSPY_PRICE);
+  }
+
+  try {
+    const results = await searchAds(keyword, country);
+    return c.json(results);
+  } catch (err: any) {
+    return c.json({ error: 'Ad spy search failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+serviceRouter.get('/adspy/competitor', async (c) => {
+  const domain = c.req.query('domain') || 'nike.com';
+  const country = c.req.query('country') || 'US';
+
+  const payment = extractPayment(c);
+  if (!payment) {
+    return build402Response(c, '/api/adspy/competitor', ADSPY_DESC, ADSPY_PRICE);
+  }
+
+  try {
+    const results = await spyOnCompetitor(domain, country);
+    return c.json(results);
+  } catch (err: any) {
+    return c.json({ error: 'Competitor spy failed', message: err?.message || String(err) }, 502);
   }
 });
