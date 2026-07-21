@@ -1499,7 +1499,7 @@ serviceRouter.get('/price/check', async (c) => {
   }
 
   // Check payment
-  const payment = extractPayment(c.req.raw);
+  const payment = extractPayment(c);
   if (!payment) {
     return build402Response(c, PM_SERVICE, PM_PRICE, PM_DESC);
   }
@@ -1518,7 +1518,7 @@ serviceRouter.get('/price/check', async (c) => {
 });
 
 serviceRouter.post('/price/batch', async (c) => {
-  const payment = extractPayment(c.req.raw);
+  const payment = extractPayment(c);
   if (!payment) {
     return build402Response(c, PM_SERVICE, PM_PRICE, PM_DESC);
   }
