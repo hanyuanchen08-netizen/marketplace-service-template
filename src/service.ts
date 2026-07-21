@@ -28,6 +28,7 @@ import {
   findCompanyEmployees 
 } from './scrapers/linkedin-enrichment';
 import { getProfile, getPosts, analyzeProfile, analyzeImages, auditProfile } from './scrapers/instagram-scraper';
+import { scrapeProductPrice, batchCheckProducts, PRICE_USDC as PM_PRICE, DESCRIPTION as PM_DESC, SERVICE_NAME as PM_SERVICE } from './scrapers/price-monitor';
 import { searchReddit, getSubreddit, getTrending, getComments } from './scrapers/reddit-scraper';
 
 export const serviceRouter = new Hono();
@@ -1484,5 +1485,49 @@ serviceRouter.get('/serp', async (c) => {
     });
   } catch (err: any) {
     return c.json({ error: 'SERP scrape failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+// ─── PRICE MONITOR ROUTES ─────────────────────────
+serviceRouter.get('/price/check', async (c) => {
+  const url = c.req.query('url');
+  const store = c.req.query('store') || 'auto';
+  const targetPrice = parseFloat(c.req.query('targetPrice') || '0') || undefined;
+
+  if (!url) {
+    return c.json({ error: 'url parameter is required' }, 400);
+  }
+
+  // Check payment
+  const payment = extractPayment(c.req.raw);
+  if (!payment) {
+    return build402Response(c, PM_SERVICE, PM_PRICE, PM_DESC);
+  }
+
+  try {
+    const result = await scrapeProductPrice(url, store, targetPrice);
+    return c.json({
+      ...result,
+      meta: {
+        proxy: { ip: 'proxies.sx-mobile', country: 'any', host: 'proxies.sx', type: 'mobile' }
+      }
+    });
+  } catch (err: any) {
+    return c.json({ error: 'Price check failed', message: err?.message || String(err) }, 502);
+  }
+});
+
+serviceRouter.post('/price/batch', async (c) => {
+  const payment = extractPayment(c.req.raw);
+  if (!payment) {
+    return build402Response(c, PM_SERVICE, PM_PRICE, PM_DESC);
+  }
+
+  try {
+    const body = await c.req.json();
+    const batchResult = await batchCheckProducts(body);
+    return c.json(batchResult);
+  } catch (err: any) {
+    return c.json({ error: 'Batch price check failed', message: err?.message || String(err) }, 502);
   }
 });
