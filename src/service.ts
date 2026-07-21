@@ -1541,20 +1541,14 @@ serviceRouter.get('/travel/flights', async (c) => {
 
   const payment = extractPayment(c);
   if (!payment) {
-    return c.json(build402Response(c, '/api/travel/flights', FLIGHTS_DESC, FLIGHTS_PRICE_USDC, walletAddress, {
-      input: { origin: 'string — Departure city (default: NYC)', destination: 'string — Arrival city (default: LAX)', date: 'string — Flight date YYYY-MM-DD' },
-      output: { airline: 'string', price: 'number', currency: 'string', stops: 'number', duration: 'string' },
-    }), 402);
+    return build402Response(c, '/api/travel/flights', FLIGHTS_DESC, FLIGHTS_PRICE_USDC);
   }
-
-  const verification = await verifyPayment(payment, walletAddress, FLIGHTS_PRICE_USDC);
-  if (!verification.valid) return c.json({ error: 'Payment verification failed' }, 402);
 
   try {
     const results = await scrapeFlights({ origin, destination, date });
-    return c.json({ results, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'any', type: 'mobile' } } });
+    return c.json({ results, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'any', host: 'proxies.sx', type: 'mobile' } } });
   } catch (err: any) {
-    return c.json({ error: 'Flight search failed', message: err?.message }, 502);
+    return c.json({ error: 'Flight search failed', message: err?.message || String(err) }, 502);
   }
 });
 
@@ -1565,19 +1559,13 @@ serviceRouter.get('/travel/hotels', async (c) => {
 
   const payment = extractPayment(c);
   if (!payment) {
-    return c.json(build402Response(c, '/api/travel/hotels', HOTELS_DESC, HOTELS_PRICE_USDC, walletAddress, {
-      input: { destination: 'string — City (default: Paris)', checkIn: 'string — Check-in YYYY-MM-DD', checkOut: 'string — Check-out YYYY-MM-DD' },
-      output: { name: 'string', pricePerNight: 'number', currency: 'string', rating: 'number|null', stars: 'number|null', amenities: 'string[]' },
-    }), 402);
+    return build402Response(c, '/api/travel/hotels', HOTELS_DESC, HOTELS_PRICE_USDC);
   }
-
-  const verification = await verifyPayment(payment, walletAddress, HOTELS_PRICE_USDC);
-  if (!verification.valid) return c.json({ error: 'Payment verification failed' }, 402);
 
   try {
     const results = await scrapeHotels({ destination, checkIn, checkOut });
-    return c.json({ results, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'any', type: 'mobile' } } });
+    return c.json({ results, meta: { proxy: { ip: 'proxies.sx-mobile', country: 'any', host: 'proxies.sx', type: 'mobile' } } });
   } catch (err: any) {
-    return c.json({ error: 'Hotel search failed', message: err?.message }, 502);
+    return c.json({ error: 'Hotel search failed', message: err?.message || String(err) }, 502);
   }
 });
